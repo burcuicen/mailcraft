@@ -72,7 +72,6 @@ module.exports = {
       filename: "remoteEntry.js",
       exposes: {
         "./components": "./src/components/index.js",
-        "./api": "./src/api/index.js",
       },
       shared: {
         vue: {
