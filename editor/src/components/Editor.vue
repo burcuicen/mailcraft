@@ -1,11 +1,11 @@
-<!-- src/components/StripoEditor.vue -->
 <template>
   <div class="editor-container">
-    <!-- Template Name Modal -->
     <div v-if="showNameModal" class="modal-overlay">
       <div class="modal-container">
         <div class="modal-content">
-          <h3 class="modal-title">Save Template</h3>
+          <h3 class="modal-title">
+            {{ editingTemplate ? "Update" : "Save" }} Template
+          </h3>
           <input
             v-model="templateName"
             type="text"
@@ -18,7 +18,7 @@
               Cancel
             </button>
             <button class="modal-button save" @click="confirmSave">
-              Save Template
+              {{ editingTemplate ? "Update" : "Save" }} Template
             </button>
           </div>
         </div>
@@ -35,7 +35,7 @@
 
         <div class="action-group">
           <button class="action-button save" @click="handleSave">
-            <span>Save</span>
+            <span>{{ editingTemplate ? "Update" : "Save" }}</span>
           </button>
           <button class="action-button export" @click="handleExport">
             <span>Export</span>
@@ -64,6 +64,13 @@ import { stripoService } from "@/services/stripoService";
 export default {
   name: "StripoEditor",
 
+  props: {
+    editingTemplate: {
+      type: Object,
+      default: null,
+    },
+  },
+
   data() {
     return {
       editor: null,
@@ -71,6 +78,17 @@ export default {
       showNameModal: false,
       templateName: "",
     };
+  },
+
+  watch: {
+    editingTemplate: {
+      immediate: true,
+      handler(template) {
+        if (template) {
+          this.templateName = template.name;
+        }
+      },
+    },
   },
 
   async mounted() {
@@ -89,7 +107,8 @@ export default {
     },
 
     async initializeEditorWithTemplate() {
-      const template = await stripoService.loadTemplate();
+      const template =
+        this.editingTemplate || (await stripoService.loadTemplate());
       await stripoService.initializeEditor({
         template,
         onHistoryChange: this.handleHistoryChange,
@@ -118,17 +137,31 @@ export default {
       const result = await stripoService.saveTemplate();
       if (result) {
         const savedTemplate = {
+          id: this.editingTemplate?.id || Date.now(),
           name: this.templateName,
           html: result.html,
           css: result.css,
-          createdAt: new Date().toISOString(),
+          createdAt:
+            this.editingTemplate?.createdAt || new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
         };
 
         const templates = JSON.parse(localStorage.getItem("templates") || "[]");
-        templates.push(savedTemplate);
-        localStorage.setItem("templates", JSON.stringify(templates));
+        const existingIndex = templates.findIndex(
+          (t) => t.id === savedTemplate.id
+        );
 
+        if (existingIndex !== -1) {
+          templates[existingIndex] = savedTemplate;
+        } else {
+          templates.push(savedTemplate);
+        }
+
+        localStorage.setItem("templates", JSON.stringify(templates));
         this.showNameModal = false;
+        this.showSuccessMessage(
+          `Template ${this.editingTemplate ? "updated" : "saved"} successfully!`
+        );
         this.$emit("saved");
       }
     },
