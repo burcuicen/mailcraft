@@ -5,7 +5,7 @@
       @go-back="toggleHome"
       :showEditor="showEditor"
     />
-    <component :is="Editor" v-if="Editor && showEditor" />
+    <component :is="Editor" v-if="Editor && showEditor" @saved="toggleHome" />
   </div>
 </template>
 
