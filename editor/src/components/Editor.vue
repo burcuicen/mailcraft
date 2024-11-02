@@ -1,3 +1,4 @@
+<!-- src/components/StripoEditor.vue -->
 <template>
   <div class="editor-container">
     <div class="editor-header">
@@ -42,7 +43,6 @@ export default {
   data() {
     return {
       editor: null,
-      isCodeEditorOpen: false,
       isLoading: true,
     };
   },
@@ -55,7 +55,6 @@ export default {
     async setupEditor() {
       await this.loadEditorDependencies();
       await this.initializeEditorWithTemplate();
-
       this.startLoadingTimeout();
     },
 
@@ -65,7 +64,6 @@ export default {
 
     async initializeEditorWithTemplate() {
       const template = await stripoService.loadTemplate();
-
       await stripoService.initializeEditor({
         template,
         onHistoryChange: this.handleHistoryChange,
@@ -99,13 +97,12 @@ export default {
       alert(message);
     },
 
-    showErrorMessage(message) {
-      alert(message);
+    handleHistoryChange(lastChangeInfoText) {
+      console.log("History change:", lastChangeInfoText);
     },
   },
 
   beforeUnmount() {
-    this.cleanupEventListeners();
     stripoService.cleanup();
   },
 };
@@ -117,14 +114,12 @@ export default {
   display: flex;
   flex-direction: column;
   height: 100vh;
-
   background-color: #f8f9fa;
 }
 
 /* Header Section */
 .editor-header {
   padding: 1rem;
-
   background-color: #ffffff;
   border-bottom: 1px solid #e9ecef;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
@@ -146,21 +141,15 @@ export default {
 /* Buttons */
 .tool-button {
   height: 36px;
-
   display: flex;
   align-items: center;
   gap: 0.5rem;
-
   padding: 0 15px;
-
   border: 1px solid #dee2e6;
   border-radius: 4px;
   background-color: #ffffff;
-
   color: #495057;
-
   cursor: pointer;
-
   transition: all 0.2s ease;
 }
 
@@ -170,24 +159,18 @@ export default {
 
 .action-button {
   cursor: pointer;
-
   height: 36px;
-
   display: flex;
   align-items: center;
   gap: 0.5rem;
-
   padding: 0 15px;
-
   border-radius: 4px;
-
   transition: all 0.2s ease;
 }
 
 .action-button.save {
   background-color: #28a745;
   border-color: #28a745;
-
   color: white;
 }
 
@@ -199,7 +182,6 @@ export default {
 .action-button.export {
   background-color: #6c757d;
   border-color: #6c757d;
-
   color: white;
 }
 
@@ -208,6 +190,7 @@ export default {
   border-color: #545b62;
 }
 
+/* Workspace */
 .editor-workspace {
   flex: 1;
   position: relative;
@@ -220,27 +203,21 @@ export default {
   left: 0;
   right: 0;
   bottom: 0;
-
   background-color: rgba(255, 255, 255, 0.9);
-
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-
   gap: 1rem;
-
   z-index: 1000;
 }
 
 .spinner {
   width: 40px;
   height: 40px;
-
   border: 3px solid #f3f3f3;
   border-top: 3px solid #007bff;
   border-radius: 50%;
-
   animation: spin 1s linear infinite;
 }
 
@@ -253,6 +230,7 @@ export default {
   }
 }
 
+/* Stripo Containers */
 .stripo-containers {
   display: flex;
   height: 100%;
@@ -260,16 +238,13 @@ export default {
 
 #stripoSettingsContainer {
   width: 400px;
-
   background-color: #ffffff;
   border-right: 1px solid #e9ecef;
-
   overflow: auto;
 }
 
 #stripoPreviewContainer {
   flex: 1;
-
   background-color: #ffffff;
   overflow: auto;
 }

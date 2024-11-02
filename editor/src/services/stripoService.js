@@ -1,143 +1,100 @@
 // src/services/stripoService.js
+import { STORAGE, SCRIPT, TEMPLATE_URLS } from "./constants";
+import { createEditorConfig } from "./config/stripoConfig";
+
 export const stripoService = {
   loadScript() {
-    return new Promise((resolve, reject) => {
-      const existingScript = document.getElementById("stripoScript");
-      if (existingScript) {
-        existingScript.remove();
-      }
+    this.removeExistingScript();
+    return this.appendNewScript();
+  },
 
+  removeExistingScript() {
+    const existingScript = document.getElementById(SCRIPT.ID);
+    if (existingScript) {
+      existingScript.remove();
+    }
+  },
+
+  appendNewScript() {
+    return new Promise(function (resolve, reject) {
       const script = document.createElement("script");
-      script.id = "stripoScript";
+      script.id = SCRIPT.ID;
       script.type = "text/javascript";
-      script.src = "https://plugins.stripo.email/static/latest/stripo.js";
+      script.src = SCRIPT.URL;
       script.onload = resolve;
-      script.onerror = () => reject(new Error("Failed to load Stripo script"));
+      script.onerror = function () {
+        reject(new Error("Failed to load Stripo script"));
+      };
       document.head.appendChild(script);
     });
   },
 
   async loadTemplate() {
-    const savedTemplate = localStorage.getItem("stripoTemplate");
-    if (savedTemplate) {
-      return JSON.parse(savedTemplate);
-    }
-
-    try {
-      const htmlResponse = await fetch(
-        "https://raw.githubusercontent.com/ardas/stripo-plugin/master/Public-Templates/Basic-Templates/Trigger%20newsletter%20mockup/Trigger%20newsletter%20mockup.html"
-      );
-      const cssResponse = await fetch(
-        "https://raw.githubusercontent.com/ardas/stripo-plugin/master/Public-Templates/Basic-Templates/Trigger%20newsletter%20mockup/Trigger%20newsletter%20mockup.css"
-      );
-
-      const html = await htmlResponse.text();
-      const css = await cssResponse.text();
-
-      return { html, css };
-    } catch (error) {
-      console.error("Failed to load template:", error);
-      throw error;
-    }
+    const savedTemplate = this.getSavedTemplate();
+    return savedTemplate || this.fetchDefaultTemplate();
   },
 
-  initializeEditor({ template, onHistoryChange, onButtonsInit }) {
-    return window.Stripo.init({
-      settingsId: "stripoSettingsContainer",
-      previewId: "stripoPreviewContainer",
-      codeEditorButtonId: "codeEditor",
-      undoButtonId: "undoButton",
-      redoButtonId: "redoButton",
-      changeHistoryLinkId: "changeHistoryLink",
-      html: template.html,
-      css: template.css,
-      apiRequestData: {
-        emailId: `demo-${Date.now()}`,
-      },
-      userFullName: "Demo User",
-      versionHistory: {
-        changeHistoryLinkId: "changeHistoryLink",
-        onInitialized: onHistoryChange,
-      },
-      onBeforeButtonsInit: onButtonsInit,
-      notifications: {
-        success: (message) => console.log("Success:", message),
-        error: (message) => console.error("Error:", message),
-      },
-      getAuthToken: async (callback) => {
-        try {
-          const response = await fetch(
-            "https://plugins.stripo.email/api/v1/auth",
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                pluginId: process.env.STRIPO_PLUGIN_ID,
-                secretKey: process.env.STRIPO_SECRET_KEY,
-              }),
-            }
-          );
+  getSavedTemplate() {
+    const template = localStorage.getItem(STORAGE.TEMPLATE);
+    return template ? JSON.parse(template) : null;
+  },
 
-          if (!response.ok) {
-            throw new Error("Auth request failed");
-          }
+  async fetchDefaultTemplate() {
+    const [html, css] = await Promise.all([
+      this.fetchTemplateContent(TEMPLATE_URLS.html),
+      this.fetchTemplateContent(TEMPLATE_URLS.css),
+    ]);
+    return { html, css };
+  },
 
-          const data = await response.json();
-          callback(data.token);
-        } catch (error) {
-          console.error("Auth error:", error);
-          callback(null);
-        }
-      },
+  async fetchTemplateContent(url) {
+    const response = await fetch(url);
+    return response.text();
+  },
+
+  initializeEditor(options) {
+    const config = createEditorConfig(
+      options.template,
+      options.onHistoryChange
+    );
+    return window.Stripo.init(config);
+  },
+
+  saveTemplate() {
+    if (!this.isApiInitialized()) return null;
+    return this.saveTemplateToStorage();
+  },
+
+  saveTemplateToStorage() {
+    return new Promise(function (resolve) {
+      window.StripoApi.getTemplate(function (html, css) {
+        const template = { html, css };
+        localStorage.setItem(STORAGE.TEMPLATE, JSON.stringify(template));
+        resolve(template);
+      });
     });
   },
 
-  async saveTemplate() {
-    try {
-      return await new Promise((resolve, reject) => {
-        if (!window.StripoApi) {
-          reject(new Error("Stripo API not initialized"));
-          return;
-        }
-
-        window.StripoApi.getTemplate((html, css) => {
-          const template = { html, css };
-          localStorage.setItem("stripoTemplate", JSON.stringify(template));
-          resolve(template);
-        });
-      });
-    } catch (error) {
-      console.error("Save failed:", error);
-      throw error;
-    }
+  exportTemplate() {
+    if (!this.isApiInitialized()) return null;
+    return this.compileEmail();
   },
 
-  async exportTemplate() {
-    try {
-      return await new Promise((resolve, reject) => {
-        if (!window.StripoApi) {
-          reject(new Error("Stripo API not initialized"));
-          return;
-        }
-
-        window.StripoApi.compileEmail((error, html, ampHtml) => {
-          if (error) {
-            reject(error);
-            return;
-          }
-          resolve({ html, ampHtml });
-        });
+  compileEmail() {
+    return new Promise(function (resolve) {
+      window.StripoApi.compileEmail(function (error, html, ampHtml) {
+        if (error) return resolve(null);
+        resolve({ html, ampHtml });
       });
-    } catch (error) {
-      console.error("Export failed:", error);
-      throw error;
-    }
+    });
+  },
+
+  isApiInitialized() {
+    return !!window.StripoApi;
   },
 
   cleanup() {
-    if (window.StripoApi) {
+    if (this.isApiInitialized()) {
       window.StripoApi.stop();
     }
   },
