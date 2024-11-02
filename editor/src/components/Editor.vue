@@ -1,4 +1,3 @@
-<!-- src/components/StripoEditor.vue -->
 <template>
   <div class="editor-container">
     <div class="editor-header">
@@ -39,103 +38,95 @@ import { stripoService } from "@/services/stripoService";
 
 export default {
   name: "StripoEditor",
+
   data() {
     return {
       editor: null,
-      canUndo: false,
-      canRedo: false,
-      lastChange: "",
       isCodeEditorOpen: false,
       isLoading: true,
     };
   },
 
   async mounted() {
-    try {
+    await this.setupEditor();
+  },
+
+  methods: {
+    async setupEditor() {
+      await this.loadEditorDependencies();
+      await this.initializeEditorWithTemplate();
+
+      this.startLoadingTimeout();
+    },
+
+    async loadEditorDependencies() {
       await stripoService.loadScript();
+    },
+
+    async initializeEditorWithTemplate() {
       const template = await stripoService.loadTemplate();
 
       await stripoService.initializeEditor({
         template,
-        onHistoryChange: (lastChangeInfoText) => {
-          console.log("History change:", lastChangeInfoText);
-          this.lastChange = lastChangeInfoText;
-        },
-        onButtonsInit: ({ canUndo, canRedo }) => {
-          if (typeof canUndo !== "undefined") {
-            this.canUndo = canUndo;
-          }
-          if (typeof canRedo !== "undefined") {
-            this.canRedo = canRedo;
-          }
-        },
+        onHistoryChange: this.handleHistoryChange,
       });
+    },
 
-      this.isLoading = false;
+    startLoadingTimeout() {
+      setTimeout(
+        function () {
+          this.isLoading = false;
+        }.bind(this),
+        2000
+      );
+    },
 
-      // Event listener'ları ekle
-      document.getElementById("undoButton").addEventListener("click", () => {
-        if (window.StripoApi && window.StripoApi.undo) {
-          window.StripoApi.undo();
-        }
-      });
-
-      document.getElementById("redoButton").addEventListener("click", () => {
-        if (window.StripoApi && window.StripoApi.redo) {
-          window.StripoApi.redo();
-        }
-      });
-    } catch (error) {
-      console.error("Failed to initialize editor:", error);
-    }
-  },
-
-  methods: {
     async handleSave() {
-      try {
-        const result = await stripoService.saveTemplate();
-        console.log("Template saved:", result);
-        alert("Template saved successfully!");
-      } catch (error) {
-        console.error("Save failed:", error);
-        alert("Failed to save template!");
+      const result = await stripoService.saveTemplate();
+      if (result) {
+        this.showSuccessMessage("Template saved successfully!");
       }
     },
 
     async handleExport() {
-      try {
-        const result = await stripoService.exportTemplate();
+      const result = await stripoService.exportTemplate();
+      if (result) {
         console.log("Template exported:", result);
-      } catch (error) {
-        console.error("Export failed:", error);
       }
+    },
+
+    showSuccessMessage(message) {
+      alert(message);
+    },
+
+    showErrorMessage(message) {
+      alert(message);
     },
   },
 
   beforeUnmount() {
-    document
-      .getElementById("undoButton")
-      ?.removeEventListener("click", () => {});
-    document
-      .getElementById("redoButton")
-      ?.removeEventListener("click", () => {});
+    this.cleanupEventListeners();
     stripoService.cleanup();
   },
 };
 </script>
 
 <style scoped>
+/* Main Layout */
 .editor-container {
   display: flex;
   flex-direction: column;
   height: 100vh;
+
   background-color: #f8f9fa;
 }
 
+/* Header Section */
 .editor-header {
+  padding: 1rem;
+
   background-color: #ffffff;
   border-bottom: 1px solid #e9ecef;
-  padding: 1rem;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
@@ -152,44 +143,51 @@ export default {
   gap: 0.5rem;
 }
 
-#undoButton,
-#redoButton {
-  display: inline-flex !important;
-  align-items: center;
-  justify-content: center;
-  min-width: 80px;
-  margin: 0 5px;
-}
-
-.tool-button,
-.action-button {
+/* Buttons */
+.tool-button {
   height: 36px;
+
   display: flex;
   align-items: center;
   gap: 0.5rem;
+
   padding: 0 15px;
+
   border: 1px solid #dee2e6;
   border-radius: 4px;
   background-color: #ffffff;
+
   color: #495057;
+
   cursor: pointer;
+
   transition: all 0.2s ease;
 }
 
-.tool-button:hover:not(:disabled),
-.action-button:hover {
+.tool-button:hover {
   background-color: #e9ecef;
 }
 
-.tool-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  background-color: #f8f9fa;
+.action-button {
+  cursor: pointer;
+
+  height: 36px;
+
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  padding: 0 15px;
+
+  border-radius: 4px;
+
+  transition: all 0.2s ease;
 }
 
 .action-button.save {
   background-color: #28a745;
   border-color: #28a745;
+
   color: white;
 }
 
@@ -201,37 +199,13 @@ export default {
 .action-button.export {
   background-color: #6c757d;
   border-color: #6c757d;
+
   color: white;
 }
 
 .action-button.export:hover {
   background-color: #5a6268;
   border-color: #545b62;
-}
-
-.history-container {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
-  background-color: #f8f9fa;
-  border-radius: 4px;
-  border: 1px solid #dee2e6;
-  min-width: 200px;
-}
-
-.history-link {
-  color: #007bff;
-  text-decoration: none;
-  font-weight: 500;
-  max-width: 300px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.history-link:hover {
-  text-decoration: underline;
 }
 
 .editor-workspace {
@@ -246,21 +220,27 @@ export default {
   left: 0;
   right: 0;
   bottom: 0;
+
   background-color: rgba(255, 255, 255, 0.9);
+
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+
   gap: 1rem;
+
   z-index: 1000;
 }
 
 .spinner {
   width: 40px;
   height: 40px;
+
   border: 3px solid #f3f3f3;
   border-top: 3px solid #007bff;
   border-radius: 50%;
+
   animation: spin 1s linear infinite;
 }
 
@@ -280,13 +260,16 @@ export default {
 
 #stripoSettingsContainer {
   width: 400px;
+
   background-color: #ffffff;
   border-right: 1px solid #e9ecef;
+
   overflow: auto;
 }
 
 #stripoPreviewContainer {
   flex: 1;
+
   background-color: #ffffff;
   overflow: auto;
 }
@@ -300,12 +283,6 @@ export default {
   .tool-group,
   .action-group {
     justify-content: center;
-  }
-
-  .history-container {
-    justify-content: center;
-    text-align: center;
-    padding: 0.5rem 0;
   }
 
   #stripoSettingsContainer {
