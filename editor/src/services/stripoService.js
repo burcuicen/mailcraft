@@ -1,5 +1,5 @@
-// src/services/stripoService.js
 import { STORAGE, SCRIPT, TEMPLATE_URLS } from "./constants";
+
 import { createEditorConfig } from "./config/stripoConfig";
 
 export const stripoService = {
@@ -18,6 +18,7 @@ export const stripoService = {
   appendNewScript() {
     return new Promise(function (resolve, reject) {
       const script = document.createElement("script");
+
       script.id = SCRIPT.ID;
       script.type = "text/javascript";
       script.src = SCRIPT.URL;
@@ -25,6 +26,7 @@ export const stripoService = {
       script.onerror = function () {
         reject(new Error("Failed to load Stripo script"));
       };
+
       document.head.appendChild(script);
     });
   },

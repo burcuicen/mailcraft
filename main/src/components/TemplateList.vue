@@ -1,31 +1,35 @@
-<!-- src/components/TemplateList.vue -->
 <template>
   <div class="template-list">
-    <div class="list-header">
-      <h2 class="list-title">Your Templates</h2>
+    <div class="template-list__header">
+      <h2 class="template-list__title">Your Templates</h2>
     </div>
-    <div class="list-content">
-      <div v-if="templates.length === 0" class="empty-state">
-        <p>No templates yet. Create your first template!</p>
+    <div class="template-list__content">
+      <div v-if="templates.length === 0" class="template-list__empty">
+        <p class="template-list__empty-text">
+          No templates yet. Create your first template!
+        </p>
       </div>
-      <div v-else>
+      <div v-else class="template-list__items">
         <div
           v-for="template in templates"
           :key="template.id"
-          class="template-item"
+          class="template-list__item"
         >
-          <div class="template-info">
-            <h3 class="template-name">{{ template.name }}</h3>
-            <p class="template-date">
+          <div class="template-list__info">
+            <h3 class="template-list__name">{{ template.name }}</h3>
+            <p class="template-list__date">
               Created on {{ formatDate(template.createdAt) }}
             </p>
           </div>
-          <div class="template-actions">
-            <button class="action-btn edit" @click="$emit('edit', template)">
+          <div class="template-list__actions">
+            <button
+              class="template-list__button template-list__button--edit"
+              @click="$emit('edit', template)"
+            >
               <span>Edit</span>
             </button>
             <button
-              class="action-btn delete"
+              class="template-list__button template-list__button--delete"
               @click="$emit('delete', template)"
             >
               <span>Delete</span>
@@ -58,98 +62,115 @@ export default {
 };
 </script>
 
-<style scoped>
+<style lang="scss">
 .template-list {
-  background-color: #ffffff;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-}
+  &__header {
+    padding-bottom: 16px;
+    padding-left: 16px;
 
-.list-header {
-  padding: 1.5rem;
-  border-bottom: 1px solid #e5e7eb;
-}
+    border-bottom: 1px solid #e5e7eb;
+  }
 
-.list-title {
-  color: #1f2937;
-  font-size: 1.25rem;
-  font-weight: 600;
-  margin: 0;
-}
+  &__title {
+    color: #1f2937;
+    font-size: 20px;
+    font-weight: 600;
 
-.list-content {
-  padding: 1rem;
-}
+    margin: 0;
+  }
 
-.empty-state {
-  text-align: center;
-  padding: 2rem;
-  color: #6b7280;
-}
+  &__content {
+    padding-top: 16px;
+  }
 
-.template-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 1rem;
-  border-bottom: 1px solid #e5e7eb;
-  transition: background-color 0.2s;
-}
+  &__empty {
+    text-align: center;
+    padding: 16px;
 
-.template-item:last-child {
-  border-bottom: none;
-}
+    &-text {
+      color: #6b7280;
+    }
+  }
 
-.template-item:hover {
-  background-color: #f9fafb;
-}
+  &__items {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
 
-.template-info {
-  flex: 1;
-}
+  &__item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 
-.template-name {
-  color: #1f2937;
-  font-size: 1rem;
-  font-weight: 500;
-  margin: 0 0 0.25rem 0;
-}
+    padding: 16px;
 
-.template-date {
-  color: #6b7280;
-  font-size: 0.875rem;
-  margin: 0;
-}
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 
-.template-actions {
-  display: flex;
-  gap: 0.5rem;
-}
+    transition: transform 0.2s, box-shadow 0.2s;
 
-.action-btn {
-  padding: 0.5rem 1rem;
-  border: none;
-  border-radius: 6px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
-}
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+  }
 
-.action-btn.edit {
-  background: linear-gradient(to right, #8b5cf6, #7c3aed);
-  color: white;
-}
+  &__info {
+    flex: 1;
+  }
 
-.action-btn.edit:hover {
-  background: linear-gradient(to right, #7c3aed, #6d28d9);
-}
+  &__name {
+    color: #1f2937;
+    font-size: 16px;
 
-.action-btn.delete {
-  background-color: #ef4444;
-  color: white;
-}
+    font-weight: 500;
 
-.action-btn.delete:hover {
-  background-color: #dc2626;
+    margin: 0 0 4px 0;
+  }
+
+  &__date {
+    color: #6b7280;
+    font-size: 14px;
+
+    margin: 0;
+  }
+
+  &__actions {
+    display: flex;
+    gap: 8px;
+  }
+
+  &__button {
+    padding: 8px 16px;
+
+    border: none;
+    border-radius: 6px;
+
+    font-weight: 500;
+
+    cursor: pointer;
+
+    transition: all 0.2s;
+
+    &--edit {
+      background: linear-gradient(to right, #8b5cf6, #7c3aed);
+      color: white;
+
+      &:hover {
+        background: linear-gradient(to right, #7c3aed, #6d28d9);
+      }
+    }
+
+    &--delete {
+      background-color: #ef4444;
+      color: white;
+
+      &:hover {
+        background-color: #dc2626;
+      }
+    }
+  }
 }
 </style>

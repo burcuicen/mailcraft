@@ -1,26 +1,26 @@
 <template>
   <header class="header">
-    <div class="header-container">
-      <div class="header-content">
+    <div class="header__container">
+      <div class="header__content">
         <div class="brand" @click="$emit('go-back')">
-          <h1 class="brand-title">MailCraft</h1>
-          <p class="brand-subtitle">Email Template Manager</p>
+          <h1 class="brand__title">Mail Craft</h1>
+          <p class="brand__subtitle">Email Template Manager</p>
         </div>
-        <div class="header-actions">
+        <div class="header__actions">
           <button
             v-if="showEditor"
-            class="create-button"
+            class="header__action"
             @click="$emit('go-back')"
           >
-            <span class="button-icon">⌂</span>
+            <span class="header__action-icon">⌂</span>
             Back To Home
           </button>
           <button
             v-else
-            class="create-button"
+            class="header__action"
             @click="$emit('create-template')"
           >
-            <span class="button-icon">+</span>
+            <span class="header__action-icon">+</span>
             Create Template
           </button>
         </div>
@@ -42,82 +42,69 @@ export default {
 };
 </script>
 
-<style scoped>
+<style lang="scss">
 .header {
   background: linear-gradient(to right, #8b5cf6, #f97316);
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-}
 
-.header-content {
-  height: 120px;
+  &__content {
+    height: 120px;
 
-  padding-right: 64px;
-  padding-left: 64px;
+    padding-right: 64px;
+    padding-left: 64px;
 
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-.header-actions {
-  display: flex;
-  gap: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  &__actions {
+    display: flex;
+    gap: 1rem;
+  }
+  &__action {
+    cursor: pointer;
+
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    padding: 12px 16px;
+
+    background-color: white;
+    border: none;
+    border-radius: 8px;
+
+    color: #8b5cf6;
+
+    font-weight: 600;
+
+    transition: all 0.2s ease;
+
+    &:hover {
+      background-color: #f3f4f6;
+    }
+    &-icon {
+      font-size: 21px;
+      font-weight: 700;
+    }
+  }
 }
 
 .brand {
   cursor: pointer;
-}
 
-.brand-title {
-  font-size: 2rem;
-  font-weight: 700;
-  color: white;
-  margin: 0;
-}
+  &__title {
+    font-size: 32px;
+    font-weight: 700;
 
-.brand-subtitle {
-  color: rgba(255, 255, 255, 0.9);
-  margin: 0.25rem 0 0 0;
-  font-size: 0.95rem;
-}
-
-.create-button {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
-  background-color: white;
-  color: #8b5cf6;
-  border: none;
-  border-radius: 0.5rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.create-button:hover {
-  background-color: #f3f4f6;
-  transform: translateY(-1px);
-}
-
-.button-icon {
-  font-size: 1.25rem;
-  font-weight: bold;
-}
-
-@media (max-width: 640px) {
-  .header-content {
-    flex-direction: column;
-    gap: 1rem;
-    text-align: center;
+    color: white;
+    margin: 0;
   }
+  &__subtitle {
+    color: rgba(255, 255, 255, 0.9);
 
-  .brand-title {
-    font-size: 1.75rem;
-  }
-
-  .create-button {
-    width: 100%;
-    justify-content: center;
+    margin: 1px 0 0 0;
+    font-size: 16px;
   }
 }
 </style>

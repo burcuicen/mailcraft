@@ -1,12 +1,12 @@
 <!-- HomeView.vue -->
 <template>
   <div class="home">
-    <main class="main-content">
-      <div class="stats-section">
+    <main class="home__content">
+      <div class="home__stats">
         <DashboardCard title="Total Templates" :value="templates.length" />
       </div>
 
-      <div class="templates-section">
+      <div class="home__templates">
         <TemplateList
           :templates="templates"
           @edit="handleEdit"
@@ -23,7 +23,6 @@ import TemplateList from "../components/TemplateList.vue";
 
 export default {
   name: "HomeView",
-
   components: {
     DashboardCard,
     TemplateList,
@@ -50,13 +49,32 @@ export default {
     },
 
     handleDelete(template) {
-      if (confirm("Are you sure you want to delete this template?")) {
-        const templates = JSON.parse(localStorage.getItem("templates") || "[]");
-        const updatedTemplates = templates.filter((t) => t.id !== template.id);
-        localStorage.setItem("templates", JSON.stringify(updatedTemplates));
-        this.loadTemplates();
-      }
+      //TODO: CREATE A ARE YOU SURE MODAL
+
+      const templates = JSON.parse(localStorage.getItem("templates") || "[]");
+      const updatedTemplates = templates.filter((t) => t.id !== template.id);
+      localStorage.setItem("templates", JSON.stringify(updatedTemplates));
+      this.loadTemplates();
     },
   },
 };
 </script>
+<style lang="scss">
+.home {
+  &__content {
+    padding-right: 64px;
+    padding-left: 64px;
+
+    margin-top: 32px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+  &__stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 32px;
+  }
+}
+</style>

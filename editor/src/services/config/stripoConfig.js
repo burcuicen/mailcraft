@@ -1,4 +1,3 @@
-// src/services/config/stripoConfig.js
 import { EDITOR_CONFIG, API } from "../constants";
 
 export const createEditorConfig = (template, onHistoryChange) => ({

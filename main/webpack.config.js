@@ -2,13 +2,15 @@ const path = require("path");
 const webpack = require("webpack");
 
 const { VueLoaderPlugin } = require("vue-loader");
+
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
+
 const { ModuleFederationPlugin } = require("webpack").container;
 
 module.exports = {
   entry: "./src/main.js",
-  mode: "development", // veya 'production'
+  mode: "development",
 
   output: {
     path: path.resolve(__dirname, "dist"),

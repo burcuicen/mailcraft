@@ -1,5 +1,3 @@
-// src/services/templateStore.js
-
 export const templateStore = {
   STORAGE_KEY: "mailcraft_templates",
 

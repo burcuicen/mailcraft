@@ -1,4 +1,3 @@
-// src/models/template.js
 export class Template {
   constructor(name = "", html = "", css = "") {
     this.id = Date.now();

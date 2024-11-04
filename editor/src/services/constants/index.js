@@ -1,4 +1,3 @@
-// src/services/constants/index.js
 export const STORAGE = {
   TEMPLATE: "stripoTemplate",
 };
