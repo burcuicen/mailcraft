@@ -32,8 +32,7 @@ export const stripoService = {
   },
 
   async loadTemplate() {
-    const savedTemplate = this.getSavedTemplate();
-    return savedTemplate || this.fetchDefaultTemplate();
+    return this.fetchDefaultTemplate();
   },
 
   getSavedTemplate() {
