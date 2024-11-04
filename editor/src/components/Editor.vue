@@ -147,6 +147,7 @@ export default {
       }
 
       const result = await stripoService.saveTemplate();
+
       if (result) {
         const savedTemplate = {
           id: this.editingTemplate?.id || Date.now(),
