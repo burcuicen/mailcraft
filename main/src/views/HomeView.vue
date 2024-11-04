@@ -5,6 +5,9 @@
       <div class="home__stats">
         <DashboardCard title="Total Templates" :value="templates.length" />
       </div>
+      <div class="home__custom">
+        <CustomTemplates />
+      </div>
 
       <div class="home__templates">
         <TemplateList
@@ -20,12 +23,14 @@
 <script>
 import DashboardCard from "../components/DashboardCard.vue";
 import TemplateList from "../components/TemplateList.vue";
+import CustomTemplates from "../components/CustomTemplates.vue";
 
 export default {
   name: "HomeView",
   components: {
     DashboardCard,
     TemplateList,
+    CustomTemplates,
   },
 
   data() {
