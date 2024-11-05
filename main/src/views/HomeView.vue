@@ -6,7 +6,7 @@
         <DashboardCard title="Total Templates" :value="templates.length" />
       </div>
       <div class="home__custom">
-        <CustomTemplates />
+        <CustomTemplates @edit="handleCustomEdit" />
       </div>
 
       <div class="home__templates">
@@ -47,6 +47,9 @@ export default {
     loadTemplates() {
       const savedTemplates = localStorage.getItem("templates");
       this.templates = savedTemplates ? JSON.parse(savedTemplates) : [];
+    },
+    handleCustomEdit(template) {
+      this.$emit("custom-edit", template);
     },
 
     handleEdit(template) {
