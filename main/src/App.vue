@@ -10,9 +10,14 @@
       :is="Editor"
       v-if="Editor && showEditor"
       :editingTemplate="editingTemplate"
+      :customTemplate="customTemplate"
       @saved="toggleHome"
     />
-    <HomeView v-else @edit-template="handleEditTemplate" />
+    <HomeView
+      v-else
+      @edit-template="handleEditTemplate"
+      @custom-edit="handleCustomEdit"
+    />
   </div>
 </template>
 
@@ -32,11 +37,20 @@ export default {
       Editor: null,
       showEditor: false,
       editingTemplate: null,
+      customTemplate: null,
     };
   },
   async mounted() {
     this.Editor = await loadComponent("Editor");
   },
+  watch: {
+    showEditor(val) {
+      if (!val) {
+        this.customTemplate = null;
+      }
+    },
+  },
+
   methods: {
     toggleEditor() {
       this.editingTemplate = null;
@@ -48,6 +62,10 @@ export default {
     },
     handleEditTemplate(template) {
       this.editingTemplate = template;
+      this.showEditor = true;
+    },
+    handleCustomEdit(template) {
+      this.customTemplate = template;
       this.showEditor = true;
     },
   },
