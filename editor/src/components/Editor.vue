@@ -81,6 +81,10 @@ export default {
       type: Object,
       default: null,
     },
+    customTemplate: {
+      type: Object,
+      default: null,
+    },
   },
 
   data() {
@@ -94,6 +98,14 @@ export default {
 
   watch: {
     editingTemplate: {
+      immediate: true,
+      handler(template) {
+        if (template) {
+          this.templateName = template.name;
+        }
+      },
+    },
+    customTemplate: {
       immediate: true,
       handler(template) {
         if (template) {
@@ -119,14 +131,22 @@ export default {
     },
 
     async initializeEditorWithTemplate() {
-      const template =
-        this.editingTemplate || (await stripoService.loadTemplate());
+      const template = await this.getTemplate();
+
       await stripoService.initializeEditor({
         template,
         onHistoryChange: this.handleHistoryChange,
       });
     },
 
+    async getTemplate() {
+      if (this.editingTemplate) return this.editingTemplate;
+
+      if (this.customTemplate)
+        return await stripoService.loadCustomTemplate(this.customTemplate);
+
+      return await stripoService.loadTemplate();
+    },
     startLoadingTimeout() {
       setTimeout(
         function () {
