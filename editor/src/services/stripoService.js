@@ -30,6 +30,16 @@ export const stripoService = {
       document.head.appendChild(script);
     });
   },
+  async loadCustomTemplate(template) {
+    return this.fetchCustomTemplate(template);
+  },
+  async fetchCustomTemplate(template) {
+    const [html, css] = await Promise.all([
+      this.fetchTemplateContent(template.html),
+      this.fetchTemplateContent(template.css),
+    ]);
+    return { html, css };
+  },
 
   async loadTemplate() {
     return this.fetchDefaultTemplate();
