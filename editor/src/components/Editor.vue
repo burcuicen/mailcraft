@@ -49,6 +49,7 @@
           <button
             class="stripo-editor__action-button stripo-editor__action-button--export"
             @click="handleExport"
+            :disabled="isExporting"
           >
             <span>Export</span>
           </button>
@@ -93,6 +94,7 @@ export default {
       isLoading: true,
       showNameModal: false,
       templateName: "",
+      isExporting: false,
     };
   },
 
@@ -198,9 +200,19 @@ export default {
     },
 
     async handleExport() {
+      if (this.isExporting) return;
+
+      this.isExporting = true;
+
       const result = await stripoService.exportTemplate();
-      console.log("Export result:", result);
-      // Handle export result as HTML file
+      const blob = new Blob([result.html], { type: "text/html" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "exported-template.html";
+      a.click();
+
+      this.isExporting = false;
     },
 
     handleHistoryChange(lastChangeInfoText) {
@@ -224,9 +236,14 @@ export default {
   background-color: #f8f9fa;
 
   &__header {
-    padding-top: 16px;
+    margin-top: 40px;
+    margin-bottom: 80px;
+
+    padding: 16px;
+
     background-color: #ffffff;
     border-bottom: 1px solid #e9ecef;
+
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   }
 
@@ -245,16 +262,22 @@ export default {
 
   &__tool-button {
     height: 36px;
+
     display: flex;
     align-items: center;
     gap: 8px;
+
     padding: 0 15px;
+
     border: 1px solid #dee2e6;
     border-radius: 4px;
     background-color: #ffffff;
+
     color: #495057;
     cursor: pointer;
+
     transition: all 0.2s ease;
+
     position: relative;
     overflow: hidden;
 
@@ -282,15 +305,25 @@ export default {
 
   &__action-button {
     cursor: pointer;
+
     height: 36px;
+
     display: flex;
     align-items: center;
     gap: 8px;
+
     padding: 0 15px;
+
     border-radius: 4px;
+
     font-weight: 500;
+
     border: none;
 
+    &:disabled {
+      cursor: not-allowed;
+      opacity: 0.5;
+    }
     &--save {
       background: linear-gradient(to right, #8b5cf6, #7c3aed);
       color: white;
