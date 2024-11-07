@@ -3,6 +3,7 @@ const path = require("path");
 const { VueLoaderPlugin } = require("vue-loader");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
+
 const { ModuleFederationPlugin } = require("webpack").container;
 
 const webpack = require("webpack");
